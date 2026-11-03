@@ -80,6 +80,9 @@ class SettingsPage extends StatelessWidget {
                     modelSupportMessage ??
                     (modelReady
                         ? 'The model is loaded in memory and ready to transcribe.'
+                        : modelSupported == false
+                        ? 'This phone uses its online speech-recognition service '
+                              'instead of the bundled native Whisper engine.'
                         : 'The model loads when you transcribe. The plugin may '
                               'reuse a downloaded copy on this device.'),
                 icon: modelSupported == false
@@ -98,12 +101,12 @@ class SettingsPage extends StatelessWidget {
                 _SettingRow(
                   title: 'On-device privacy',
                   value: modelSupported == false
-                      ? 'Recordings stay on this device'
+                      ? 'Online fallback is active'
                       : 'Audio is processed on this device',
                   detail: modelSupported == false
-                      ? 'This phone cannot run the bundled Whisper engine, so '
-                            'recordings cannot be transcribed here. Voice Notes '
-                            'does not upload them to a cloud service.'
+                      ? 'This phone cannot run the bundled Whisper engine. Its '
+                            'speech-recognition service may send audio over the '
+                            'internet according to the provider’s policy.'
                       : 'After the model is available, transcription is '
                             'designed to work offline. Voice Notes does not '
                             'send recordings to a cloud transcription service.',

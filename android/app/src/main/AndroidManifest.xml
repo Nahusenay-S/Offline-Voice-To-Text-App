@@ -5,7 +5,7 @@
     <application
         android:label="voice_notes"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@drawable/ic_voice_notes">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -43,6 +43,9 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
         </intent>
     </queries>
 </manifest>

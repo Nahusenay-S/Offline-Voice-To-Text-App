@@ -768,10 +768,14 @@ class _RecorderHomeState extends State<RecorderHome> {
       },
     );
     if (!initialized) {
-      throw StateError(
-        'Android speech recognition is unavailable. Install or enable a '
-        'speech recognition service, then try again.',
-      );
+      if (mounted) {
+        setState(
+          () => _status =
+              'Online speech is unavailable on this device. '
+              'Install or enable Google Speech Services, then try again.',
+        );
+      }
+      return;
     }
 
     _platformTranscript = '';
@@ -812,6 +816,15 @@ class _RecorderHomeState extends State<RecorderHome> {
     });
 
     try {
+      if (!kIsWeb &&
+          defaultTargetPlatform == TargetPlatform.android &&
+          _modelSupported == null) {
+        setState(
+          () => _status = 'Checking this phone’s Whisper compatibility...',
+        );
+        return;
+      }
+
       if (_usesPlatformSpeechRecognition) {
         await _startPlatformSpeechRecognition();
         return;
@@ -881,7 +894,7 @@ class _RecorderHomeState extends State<RecorderHome> {
           _recording = false;
           _status = _platformTranscript.trim().isEmpty
               ? 'No speech detected. Try recording again in a quiet place.'
-              : 'Speech recognized · $_language';
+              : 'Online speech recognition complete · $_language';
         });
         return;
       }
@@ -1567,32 +1580,37 @@ class _RecorderHomeState extends State<RecorderHome> {
                               ],
                             ),
                           ),
-                          const SizedBox(height: 14),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 50,
-                            child: FilledButton.icon(
-                              onPressed: _busy || _modelSupported != true
-                                  ? null
-                                  : _transcribeRecording,
-                              icon: Icon(
-                                _loadingModel
-                                    ? Icons.downloading_rounded
-                                    : Icons.graphic_eq_rounded,
-                              ),
-                              label: Text(
-                                _busy
-                                    ? 'Please wait...'
-                                    : 'Transcribe recording',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w700,
+                          if (!_usesPlatformSpeechRecognition) ...[
+                            const SizedBox(height: 14),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 50,
+                              child: FilledButton.icon(
+                                onPressed: _busy || _modelSupported != true
+                                    ? null
+                                    : _transcribeRecording,
+                                icon: Icon(
+                                  _loadingModel
+                                      ? Icons.downloading_rounded
+                                      : Icons.graphic_eq_rounded,
+                                ),
+                                label: Text(
+                                  _busy
+                                      ? 'Please wait...'
+                                      : 'Transcribe recording',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
+                          ],
                           const SizedBox(height: 8),
                           Text(
-                            kIsWeb
+                            _usesPlatformSpeechRecognition
+                                ? 'This phone uses its online speech-recognition service. '
+                                      'Keep internet access on while you speak.'
+                                : kIsWeb
                                 ? 'The first model download needs internet '
                                       '(about 57 MiB). Audio stays in your browser.'
                                 : 'First use downloads about 57 MiB. After that, '
